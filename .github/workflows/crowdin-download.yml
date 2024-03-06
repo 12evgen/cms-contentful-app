@@ -1,0 +1,37 @@
+## Scheduled syncronizes translations from Crowdin
+name: Daily Sync Crowdin (schedule)
+
+on:
+  schedule:
+    - cron:  '0 22 * * *' # Everyday at 10 PM UTC
+  workflow_dispatch:
+
+jobs:
+  synchronize-with-crowdin:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        ref: 'test'
+
+    - name: Download translations
+      uses: crowdin/github-action@1.5.2
+      with:
+        config: crowdin.yml
+        upload_sources: false
+        upload_translations: false
+        download_translations: true
+        push_translations: true
+        commit_message: '[automated] Daily sync of translations from Crowdin'
+        localization_branch_name: 'test-i18n'
+        create_pull_request: true
+        crowdin_branch_name: 'main'
+        pull_request_base_branch_name: 'test'
+        pull_request_title: 'Daily sync of translations from Crowdin'
+        pull_request_body: 'Merge this to add changes from Crowdin to this repo.'
+        pull_request_labels: 'crowdin'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+        CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}

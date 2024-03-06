@@ -1,0 +1,41 @@
+## Workflow that syncronizes translations from Crowdin
+name: Upload or update source files to Crowdin (Crowdin sync)
+
+on:
+  push:
+    branches: [test]
+    paths: ["locales/en-GB.json"]
+
+env:
+  CROWDIN_SYNC_BRANCH: 'l10n_main'
+
+jobs:
+  synchronize-with-crowdin:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Upload or update source files to Crowdin
+      uses: crowdin/github-action@1.5.2
+      with:
+        # Upload current source files
+        upload_sources: true
+        upload_translations: false
+        # Download updated translations
+        download_translations: true
+        push_translations: true
+        commit_message: '[automated] Update translations from Crowdin'
+
+        # global options
+        localization_branch_name: 'l10n_main'
+        create_pull_request: true
+        crowdin_branch_name: main
+        pull_request_title: 'Update translations from Crowdin'
+        pull_request_body: 'Merge this to add changes from Crowdin to this repo.'
+        pull_request_labels: 'crowdin'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+        CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
